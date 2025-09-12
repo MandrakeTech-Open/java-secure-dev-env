@@ -1,0 +1,76 @@
+volumes:
+  code_m2:
+  code_vol:
+  db_data:
+
+networks:
+  db-net:
+    internal: true
+  ingress-net:
+    internal: true
+  proxy-net:
+    internal: false
+
+x-pgsql-creds: &db-creds
+  POSTGRES_USER: psqladmin
+  POSTGRES_PASSWORD: secret
+  POSTGRES_DB: admin
+
+services:
+  database:
+    image: postgres:16-alpine
+    environment:
+      <<: *db-creds
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - db-net
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 32m
+  ingress:
+    image: caddy:2-alpine
+    ports:
+      - "443:443"
+    networks:
+      - ingress-net
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 32m
+    volumes:
+      - ./ingress/Caddyfile:/etc/caddy/Caddyfile
+      - ./secrets/data:/data
+      - ./secrets/config:/config
+  egress:
+    build:
+      context: ./egress
+      dockerfile: Dockerfile.egress.dev
+    networks:
+      - proxy-net
+    volumes:
+      - ./egress/squid.conf:/etc/squid/squid.conf:ro
+      - ./egress/allowed_domains.txt:/etc/squid/allowed_domains.txt:ro
+  app:
+    image: registry.gitlab.com/mandraketech/secure-dev
+    build:
+      dockerfile: Dockerfile.java.dev
+    environment:
+      POSTGRES_HOSTNAME: database
+      http_proxy: http://egress:3128
+      https_proxy: http://egress:3128
+      no_proxy:
+      <<: *db-creds
+    ports:
+      - "2222:22"
+    volumes:
+      - code_m2:/home/dev/.m2
+      - code_vol:/code
+    networks:
+      - db-net
+      - ingress-net
+    depends_on:
+      - database

@@ -1,0 +1,11 @@
+repo.maven.apache.org
+maven.apache.org
+maven.org
+raw.githubusercontent.com
+api.github.com
+github.com
+api.spring.io
+marketplace.visualstudio.com
+main.vscode-cdn.net
+.vsassets.io
+www.schemastore.org
