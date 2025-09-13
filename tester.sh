@@ -82,4 +82,4 @@ check_redirect_url "Request to loadbalancer (raw)" "http://ingress.localhost/"
 
 check_abort_url "Request to loadbalancer (secure)" "https://ingress.localhost/"
 
-check_success_or_gateway_error_url "Request to external domain with environment variable [www.localhost]" "https://www.localhost/"
+check_success_or_gateway_error_url "Request to external domain with environment variable [www.localhost:8443]" "https://www.localhost:8443/"

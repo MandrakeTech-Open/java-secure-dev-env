@@ -21,7 +21,7 @@
     }
 }
 
-www.localhost {
+www.localhost:8443 {
     tls internal
 
     log "console_logger"

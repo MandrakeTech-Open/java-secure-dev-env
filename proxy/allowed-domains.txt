@@ -1,11 +1,21 @@
+# maven
 repo.maven.apache.org
 maven.apache.org
 maven.org
+
+# github
 raw.githubusercontent.com
 api.github.com
+
+# version control
 github.com
+gitlab.com
+
+# java vscode extensions
 api.spring.io
 marketplace.visualstudio.com
 main.vscode-cdn.net
 .vsassets.io
+
+# schema validation
 www.schemastore.org
