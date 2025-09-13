@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-debian:25-cds
+FROM bellsoft/liberica-openjdk-debian:latest-cds
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -35,8 +35,6 @@ COPY sshd-config/* /etc/ssh/sshd_config.d
 RUN ssh-keygen -A
 
 EXPOSE 22
-
-VOLUME ["/code"]
 
 # Entrypoint script: generates host key if missing, copies user keys if provided, and starts sshd
 COPY entrypoint.sh /entrypoint.sh
