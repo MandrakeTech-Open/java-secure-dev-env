@@ -1,74 +1,46 @@
-FROM bellsoft/liberica-openjdk-alpine:latest-cds
+FROM bellsoft/liberica-openjdk-debian:25-cds
 
-RUN apk add --no-cache bash git curl unzip openssh-server openssh-client
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Create user and setup SSH as root
-RUN adduser -g "dev user" -D -s /bin/bash dev && \
-    # change the password and unlock ssh && \
+# Install required packages using Debian package manager
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    bash \
+    git \
+    curl \
+    unzip \
+    openssh-server \
+    openssh-client \
+    ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Ensure sshd runtime directories exist
+RUN mkdir -p /run/sshd /var/run/sshd
+
+# Create user and set a simple password for development use
+RUN adduser --disabled-password --comment "dev user" --shell /bin/bash dev && \
     echo "dev:dev" | chpasswd
 
-RUN mkdir -p /home/dev/.ssh /code && \
-    chown -R dev:dev /home/dev/.ssh /code && \
-    chmod 700 /home/dev/.ssh && \
-    ssh-keygen -A
+# Create code and ssh directories and set proper ownership/permissions
+RUN mkdir -p /code /home/dev/.ssh && \
+    chown -R dev:dev /code /home/dev/.ssh && \
+    chmod 700 /home/dev/.ssh
 
-# Configure SSH daemon
-RUN mkdir -p /etc/ssh/sshd_config.d && \
-    cat <<EOF > /etc/ssh/sshd_config.d/user-dev-enable.conf
-# PermitRootLogin no
-PasswordAuthentication no
-PubkeyAuthentication yes
-ListenAddress 0.0.0.0
-ListenAddress ::
-HostKey /etc/ssh/ssh_host_ed25519_key
-AllowUsers dev
-EOF
+# Configure SSH daemon (additional configuration file)
+RUN mkdir -p /etc/ssh/sshd_config.d
+
+COPY sshd-config/* /etc/ssh/sshd_config.d
+
+# Generate host keys if necessary
+RUN ssh-keygen -A
 
 EXPOSE 22
 
 VOLUME ["/code"]
 
-RUN touch /entrypoint.sh && \
-    chmod +x /entrypoint.sh && \
-    cat <<'EOF' > /entrypoint.sh
-#!/usr/bin/env bash
-# fail on error
-set -e
+# Entrypoint script: generates host key if missing, copies user keys if provided, and starts sshd
+COPY entrypoint.sh /entrypoint.sh
 
-if [[ ! -f /etc/ssh/ssh_host_ed25519_key ]]; then
-    echo "Generating host key"
-    ssh-keygen -t ed25519 -C "default key" -N "" -f "/etc/ssh/ssh_host_ed25519_key"
-fi
-
-if [[ -f /home/dev/host/ssh_key_public ]]; then
-    echo "Copy public key to authorized_keys"
-    cp /home/dev/host/ssh_key_public /home/dev/.ssh/authorized_keys
-    chown dev:dev /home/dev/.ssh/authorized_keys
-    chmod 400 /home/dev/.ssh/authorized_keys
-fi
-
-if [[ -f /home/dev/host/ssh_key_private ]]; then
-    echo "Copy private key to ssh folder"
-    # cp /home/dev/host/ssh_key_public /home/dev/.ssh/id_ed25519.pub
-    cp /home/dev/host/ssh_key_private /home/dev/.ssh/id_ed25519
-    chown dev:dev /home/dev/.ssh/id_ed25519
-    chmod 400 /home/dev/.ssh/id_ed25519
-fi
-
-# if [[ ! -f /home/dev/.ssh/id_ed25519 ]] ; then
-#     echo "No private key found. Generating one."
-#     ssh-keygen -t ed25519 -C "secure-dev-key" -N "" -f "/home/dev/.ssh/id_ed25519"
-# fi
-
-if [[ ! -f /home/dev/.ssh/authorized_keys ]]; then
-    echo "No authorized key file found. Cannot enable sshd. Running tail."
-    exec tail -f /dev/null
-else
-    echo "Starting sshd server"
-    exec /usr/sbin/sshd -De
-fi
-
-echo "Done"
-EOF
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]

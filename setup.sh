@@ -1,14 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # setup.sh - Initialize the development environment
 
-set -e
-
-docker_compose_cmd="podman-compose"
+docker_compose_cmd="docker compose"
 
 echo "Setting up Docker Compose development environment..."
 
-# Create directory structure
-mkdir -p secrets
+if [[ ! -d ./secrets ]]; then
+    # Create directory structure
+    mkdir secrets
+fi
 
 # Check if SSH key exists
 ssh_key_prefix=id
@@ -38,10 +38,10 @@ echo ""
 echo "Setup complete! Your development environment is ready."
 echo ""
 echo "Services:"
-echo "  - Reverse Proxy (Caddy): https://www.localhost:8443"
+echo "  - Ingress: https://www.localhost:8443"
 echo "  - Dev container SSH: ssh dev@localhost -p 2222"
 echo "  - Database: PostgreSQL on internal network"
-echo "  - proxy: Squid on http://proxy:3128 on internal network"
+echo "  - egress: Squid on http://egress:3128 on internal network"
 echo ""
 echo "To connect to the dev container:"
 echo "  ssh dev@localhost -p 2222"

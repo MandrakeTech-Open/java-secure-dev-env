@@ -1,91 +1,93 @@
 volumes:
-  code_m2:
-  code_vol:
-  db_data:
+    code_m2:
+    code_vol:
+    db_data:
 
 networks:
-  db-net:
-    internal: true
-  reverse-proxy-net:
-    internal: true
-  proxy-net:
-    internal: false
+    db-net:
+        internal: true
+    ingress-net:
+        internal: true
+    egress-net:
+        internal: false
 
 x-pgsql-creds: &db-creds
-  POSTGRES_USER: psqladmin
-  POSTGRES_PASSWORD: secret
-  POSTGRES_DB: admin
+    POSTGRES_USER: psqladmin
+    POSTGRES_PASSWORD: secret
+    POSTGRES_DB: admin
 
 services:
-  database:
-    image: postgres:16-alpine
-    environment:
-      TZ: Asia/Kolkata
-      <<: *db-creds
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    networks:
-      - db-net
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 128m
-  reverse-proxy:
-    image: caddy:2-alpine
-    ports:
-      - name: https
-        published: 8443
-        target: 8443
-      - name: http
-        published: 8080
-        target: 8080
-    networks:
-      - reverse-proxy-net
-    depends_on:
-      - app
-    deploy:
-      resources:
-        limits:
-          cpus: "0.2"
-          memory: 32m
-    volumes:
-      - ./reverse-proxy/Caddyfile:/etc/caddy/Caddyfile
-      - ./secrets/data:/data
-      - ./secrets/config:/config
-  proxy:
-    image: registry.gitlab.com/mandraketech/proxy
-    build:
-      context: ./proxy
-    networks:
-      - proxy-net
-    depends_on:
-      - app
-    volumes:
-      - ./proxy/squid.conf:/etc/squid/squid.conf:ro
-      - ./proxy/allowed-domains.txt:/etc/squid/allowed-domains.txt:ro
-  app:
-    image: registry.gitlab.com/mandraketech/secure-dev
-    build:
-      context: .
-    environment:
-      POSTGRES_HOSTNAME: database
-      http_proxy: http://proxy:3128
-      https_proxy: http://proxy:3128
-      no_proxy: database,proxy
-      <<: *db-creds
-    ports:
-      - name: ssh
-        published: 2222
-        target: 22
-    depends_on:
-      - database
-    volumes:
-      - code_m2:/home/dev/.m2
-      - code_vol:/code
-      - ~/.ssh/id_ed25519:/home/dev/host/ssh_key_private:ro
-      - ~/.ssh/id_ed25519.pub:/home/dev/host/ssh_key_public:ro
-    networks:
-      - db-net
-      - reverse-proxy-net
-      - proxy-net
+    database:
+        image: postgres:16-alpine
+        environment:
+            TZ: Asia/Kolkata
+            <<: *db-creds
+        volumes:
+            - db_data:/var/lib/postgresql/data
+        networks:
+            - db-net
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.5"
+                    memory: 128m
+    ingress:
+        image: registry.gitlab.com/mandraketech/ingress
+        build:
+            context: ./ingress
+        ports:
+            - name: https
+              published: 443
+              target: 443
+            - name: http
+              published: 80
+              target: 80
+        networks:
+            - ingress-net
+        depends_on:
+            - app
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.2"
+                    memory: 32m
+        volumes:
+            - ./ingress/Caddyfile:/etc/caddy/Caddyfile:ro
+            - ./secrets/data:/data
+            - ./secrets/config:/config
+    egress:
+        image: registry.gitlab.com/mandraketech/egress
+        build:
+            context: ./egress
+        networks:
+            - egress-net
+        depends_on:
+            - app
+        volumes:
+            - ./egress/squid.conf:/etc/squid/squid.conf:ro
+            - ./egress/allowed-domains.txt:/etc/squid/allowed-domains.txt:ro
+    app:
+        image: registry.gitlab.com/mandraketech/secure-dev
+        build:
+            context: .
+        environment:
+            POSTGRES_HOSTNAME: database
+            http_proxy: http://egress:3128
+            https_proxy: http://egress:3128
+            no_proxy: database,egress
+            <<: *db-creds
+        ports:
+            - name: ssh
+              published: 2222
+              target: 22
+        depends_on:
+            - database
+        volumes:
+            - code_m2:/home/dev/.m2
+            - code_vol:/code
+            - ~/.ssh/id_ed25519:/home/dev/host/ssh_key_private:ro
+            - ~/.ssh/id_ed25519.pub:/home/dev/host/ssh_key_public:ro
+        networks:
+            - db-net
+            - ingress-net
+            - egress-net

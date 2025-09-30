@@ -1,9 +1,14 @@
 # maven
 repo.maven.apache.org
 maven.apache.org
+search.maven.org
 maven.org
+services.gradle.org
 
-# github
+# java
+docs.oracle.com
+
+# github extension
 raw.githubusercontent.com
 api.github.com
 
@@ -19,3 +24,6 @@ main.vscode-cdn.net
 
 # schema validation
 www.schemastore.org
+
+# jetbrains ai
+www.jetbrains.com

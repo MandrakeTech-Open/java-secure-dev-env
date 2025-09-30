@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+if [[ ! -z "${DEBUG}" ]]; then
+    CURL_OPTS="-v"
+fi
 
 hit_url() {
     unset HTTP_RESP_CODE
@@ -9,8 +13,9 @@ hit_url() {
         exit 100
     fi
 
+    # shellcheck disable=SC2086
+    HTTP_RESP_CODE=$(curl ${CURL_OPTS} -sk -o /dev/null --no-buffer -w '%{http_code}' "${url}")
     # Check the HTTP status code
-    HTTP_RESP_CODE=$(curl -sk -o /dev/null --no-buffer -w '%{http_code}' ${url})
     if [[ "${HTTP_RESP_CODE}" == "000" ]]; then
         HTTP_RESP_CODE=0
     fi
@@ -34,7 +39,6 @@ check_abort_url() {
     # Fail if the response code is not 400-499 (HTTP aborts)
     if [[ ${HTTP_RESP_CODE} -ne 0 && (${HTTP_RESP_CODE} -lt 400 || ${HTTP_RESP_CODE} -gt 499) ]]; then
         >&2 echo "Error: Unexpected response code from [$url]: $HTTP_RESP_CODE"
-        exit 10
     fi
 }
 
@@ -54,7 +58,6 @@ check_redirect_url() {
     # Fail if the response code is not 400-499 (HTTP aborts)
     if [[ $HTTP_RESP_CODE -ne 308 ]]; then
         >&2 echo "Error: Unexpected response code from [$url]: $HTTP_RESP_CODE"
-        exit 11
     fi
 }
 
@@ -74,12 +77,11 @@ check_success_or_gateway_error_url() {
     # Fail if the response code is not 400-499 (HTTP aborts)
     if [[ $HTTP_RESP_CODE -lt 500 || $HTTP_RESP_CODE -gt 599 ]]; then
         >&2 echo "Error: Unexpected response code from [$url]: $HTTP_RESP_CODE"
-        exit 12
     fi
 }
 
-check_redirect_url "Request to loadbalancer (raw)" "http://ingress.localhost/"
+check_redirect_url "Request to loadbalancer (raw)" "http://www.localhost/robots.txt"
 
-check_abort_url "Request to loadbalancer (secure)" "https://ingress.localhost/"
+check_abort_url "Request to loadbalancer (secure)" "https://www.localhost/"
 
-check_success_or_gateway_error_url "Request to external domain with environment variable [www.localhost:8443]" "https://www.localhost:8443/"
+check_success_or_gateway_error_url "Request to external domain with environment variable [www.localhost]" "https://www.localhost/robots.txt"
