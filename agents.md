@@ -1,48 +1,41 @@
 # AGENTS.md
 
-This file provides instructions for AI coding agents to work on this project.
+This document provides guidance for AI coding agents working on this project, including Gemini CLI and GitHub Copilot.
 
-## About AGENTS.md
+## Project Context
 
-AGENTS.md is an open format for guiding coding agents, similar to a README file but specifically tailored for AI. It provides a dedicated place for instructions like setup commands, code style, and testing procedures that coding agents need to work on a project.
+This project is a Java secure development environment, primarily focusing on Dockerized services for egress filtering.
 
-## Setup
+## Setup Instructions
 
-To set up the development environment, run the following command:
+To set up the development environment:
+1.  Ensure Docker and Docker Compose are installed.
+2.  Clone the repository.
+3.  Build and run the services using `docker compose up --build`.
 
-```bash
-./setup.sh
-```
+## Code Style and Conventions
 
-## Building and Running
+-   **Java:** Adhere to Google Java Format.
+-   **Shell Scripts:** Follow ShellCheck recommendations.
+-   **Dockerfiles:** Follow best practices for Dockerfile optimization and security.
+-   **Squid Configuration:** Follow Squid's official documentation and best practices for security and performance.
 
-To build and run the services, use docker-compose:
+## Development Environment
 
-```bash
-docker-compose up -d
-```
+-   **IDE:** IntelliJ IDEA (for Java), VS Code (for general development, Dockerfiles, shell scripts).
+-   **Tools:** Docker, Docker Compose, Git.
 
-## Testing
+## Testing Instructions
 
-To run the tests for the egress service, use the following command:
+-   To run unit tests (if applicable): [Specify command, e.g., `mvn test`]
+-   To run integration tests for egress service:
+    1.  Start only the egress service: `docker compose up -d egress`
+    2.  Execute the tester script inside the egress container: `docker compose exec egress /egress/tester.sh`
+    3.  Stop the egress service: `docker compose down egress`
 
-```bash
-docker-compose up -d egress
-docker-compose exec egress tester.sh
-```
+## Pull Request Instructions
 
-This will start only the egress service and run the tests in `tester.sh`.
-
-## Code Style
-
-This project follows the standard shell script and Dockerfile conventions.
-
-## Agent-Specific Instructions
-
-### Gemini CLI
-
-This project is compatible with the Gemini CLI.
-
-### GitHub Copilot
-
-This project is compatible with GitHub Copilot.
+-   Ensure all changes are thoroughly tested.
+-   Provide clear and concise commit messages.
+-   Reference relevant issues or tasks.
+-   Ensure code adheres to project style guides.
