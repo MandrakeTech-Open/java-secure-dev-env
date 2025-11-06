@@ -64,13 +64,11 @@ services:
         networks:
             - internet
             - egress-net
-        depends_on:
-            - app
         volumes:
             - ./egress/squid.conf:/etc/squid/squid.conf:ro
             - ./egress/lists.d:/etc/squid/lists.d:ro
             - ./egress/tester.sh:/usr/local/bin/tester.sh:ro
-            
+
     app:
         image: registry.gitlab.com/mandraketech/secure-dev
         build:
