@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 if [[ ! -z "${DEBUG}" ]]; then
     CURL_OPTS="-v"
