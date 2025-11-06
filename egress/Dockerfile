@@ -15,12 +15,6 @@ RUN squid -z
 
 EXPOSE 3128
 
-COPY crl-lists.d/ /etc/squid/crl-lists.d/
-
-
-COPY domain-lists.d/ /etc/squid/domain-lists.d/
-
-
 COPY entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
