@@ -82,6 +82,8 @@ check_success_or_gateway_error_url() {
 
 check_redirect_url "Request to loadbalancer (raw)" "http://www.localhost/robots.txt"
 
+check_abort_url "Request to allowed domain over HTTP (should be denied)" "http://www.localhost/robots.txt"
+
 check_abort_url "Request to loadbalancer (secure)" "https://www.localhost/"
 
 check_success_or_gateway_error_url "Request to external domain with environment variable [www.localhost]" "https://www.localhost/robots.txt"
