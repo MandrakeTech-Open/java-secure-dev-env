@@ -66,7 +66,7 @@ services:
             - egress-net
         volumes:
             - ./egress/squid.conf:/etc/squid/squid.conf:ro
-            - ./egress/lists.d:/etc/squid/lists.d:ro
+            - ./egress/domain-lists.d:/etc/squid/domain-lists.d:ro
             - ./egress/tester.sh:/usr/local/bin/tester.sh:ro
 
     app:
