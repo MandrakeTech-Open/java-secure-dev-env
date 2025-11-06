@@ -1,8 +1,10 @@
 FROM alpine:latest
 
 RUN apk add --no-cache \
+	bash \
     ca-certificates \
-    squid
+    squid \
+    curl
 
 # Create squid user and directories
 RUN mkdir -p /var/cache/squid /var/log/squid && \
