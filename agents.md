@@ -28,8 +28,7 @@ To run the tests for the egress service, use the following command:
 
 ```bash
 docker-compose up -d egress
-cd egress
-./tester.sh
+docker-compose exec egress tester.sh
 ```
 
 This will start only the egress service and run the tests in `tester.sh`.
