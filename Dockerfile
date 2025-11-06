@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-debian:25-cds
+FROM bellsoft/liberica-openjdk-debian:latest-cds
 
 ENV DEBIAN_FRONTEND=noninteractive
 

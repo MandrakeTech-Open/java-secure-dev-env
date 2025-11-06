@@ -1,0 +1,4 @@
+^http://www\.microsoft\.com/pkiops/crl/.*\.crl$
+^http://crl\.microsoft\.com/pki/crl/products/[^/]+\.crl$
+^http://crl3\.digicert\.com/DigiCertTrusted.+\.crl$
+^http://oscp\.digicert\.com/[A-Za-z0-9%]+$

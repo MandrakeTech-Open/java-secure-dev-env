@@ -1,14 +1,4 @@
-# maven
-repo.maven.apache.org
-maven.apache.org
-search.maven.org
-maven.org
-services.gradle.org
-
-# java
-docs.oracle.com
-
-# github extension
+# github vscode extension
 raw.githubusercontent.com
 api.github.com
 
@@ -16,8 +6,7 @@ api.github.com
 github.com
 gitlab.com
 
-# java vscode extensions
-api.spring.io
+# vscode extensions marketplace
 marketplace.visualstudio.com
 main.vscode-cdn.net
 .vsassets.io

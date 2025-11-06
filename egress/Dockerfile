@@ -1,8 +1,10 @@
 FROM alpine:latest
 
 RUN apk add --no-cache \
+	bash \
     ca-certificates \
-    squid
+    squid \
+    curl
 
 # Create squid user and directories
 RUN mkdir -p /var/cache/squid /var/log/squid && \
@@ -12,6 +14,12 @@ RUN mkdir -p /var/cache/squid /var/log/squid && \
 RUN squid -z
 
 EXPOSE 3128
+
+COPY crl-lists.d/ /etc/squid/crl-lists.d/
+
+
+COPY domain-lists.d/ /etc/squid/domain-lists.d/
+
 
 COPY entrypoint.sh /entrypoint.sh
 

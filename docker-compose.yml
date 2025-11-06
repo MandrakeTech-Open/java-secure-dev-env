@@ -8,8 +8,10 @@ networks:
         internal: true
     ingress-net:
         internal: true
-    egress-net:
+    internet:
         internal: false
+    egress-net:
+        internal: true
 
 x-pgsql-creds: &db-creds
     POSTGRES_USER: psqladmin
@@ -60,12 +62,14 @@ services:
         build:
             context: ./egress
         networks:
+            - internet
             - egress-net
-        depends_on:
-            - app
         volumes:
             - ./egress/squid.conf:/etc/squid/squid.conf:ro
-            - ./egress/allowed-domains.txt:/etc/squid/allowed-domains.txt:ro
+            - ./egress/domain-lists.d:/etc/squid/domain-lists.d:ro
+            - ./egress/crl-lists.d:/etc/squid/crl-lists.d:ro
+            - ./egress/tester.sh:/usr/local/bin/tester.sh:ro
+
     app:
         image: registry.gitlab.com/mandraketech/secure-dev
         build:
