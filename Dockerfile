@@ -36,6 +36,8 @@ RUN ssh-keygen -A
 
 EXPOSE 22
 
+VOLUME ["/code"]
+
 # Entrypoint script: generates host key if missing, copies user keys if provided, and starts sshd
 COPY entrypoint.sh /entrypoint.sh
 

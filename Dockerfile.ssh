@@ -27,7 +27,7 @@ RUN mkdir -p /code /home/dev/.ssh && \
     chmod 700 /home/dev/.ssh
 
 # Generate host keys if necessary
-RUN ssh-keygen -A || true
+RUN ssh-keygen -A
 
 # Configure SSH daemon (additional configuration file)
 RUN mkdir -p /etc/ssh/sshd_config.d && \
