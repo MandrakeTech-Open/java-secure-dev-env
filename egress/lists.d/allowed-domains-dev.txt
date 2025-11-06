@@ -16,12 +16,3 @@ www.schemastore.org
 
 # jetbrains ai
 www.jetbrains.com
-
-# java vscode extension
-api.spring.io
-repo.maven.apache.org
-maven.apache.org
-search.maven.org
-maven.org
-services.gradle.org
-docs.oracle.com
