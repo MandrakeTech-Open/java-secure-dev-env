@@ -79,24 +79,26 @@ function test_blocked_urls() {
 }
 
 function test_caching_behavior() {
+    local error_count=0
     log "Testing caching behavior..."
     for cached_url in "${cached_urls[@]}"; do
-        log "Making two requests to the same domain to ensure no caching occurs..."
-        log "First request: "
-        time1=$(curl -s --proxy "$proxy_url" --connect-timeout 3 --max-time 5 -w "%{time_total}" -o /dev/null "$cached_url" 2>/dev/null)
-        log "${time1}s"
+        log "Testing $cached_url for caching..."
 
-        log "Second request: "
-        time2=$(curl -s --proxy "$proxy_url" --connect-timeout 3 --max-time 5 -w "%{time_total}" -o /dev/null "$cached_url" 2>/dev/null)
-        log "${time2}s"
-
-        time_ratio=$(echo "$time2 / $time1 * 100" | bc -l)
-        time_ratio=${time_ratio%.*}
-
-        if [ "$time_ratio" -lt 80 ]; then
-            log "✅ [$cached_url] Caching is working (second request was faster)"
+        log "First request (should be MISS):"
+        response_headers=$(curl -s -v --proxy "$proxy_url" --connect-timeout 5 --max-time 10 -o /dev/null "$cached_url" 2>&1 | grep -i "X-Cache")
+        if echo "$response_headers" | grep -q "X-Cache: MISS"; then
+            log "✅ [$cached_url] First request was a MISS (as expected)"
         else
-            log "❌ [$cached_url] Caching is NOT working (second request was NOT faster)"
+            log "❌ [$cached_url] First request was NOT a MISS. Headers: $response_headers"
+            error_count=$((error_count + 1))
+        fi
+
+        log "Second request (should be HIT):"
+        response_headers=$(curl -s -v --proxy "$proxy_url" --connect-timeout 5 --max-time 10 -o /dev/null "$cached_url" 2>&1 | grep -i "X-Cache")
+        if echo "$response_headers" | grep -q "X-Cache: HIT"; then
+            log "✅ [$cached_url] Second request was a HIT (as expected)"
+        else
+            log "❌ [$cached_url] Second request was NOT a HIT. Headers: $response_headers"
             error_count=$((error_count + 1))
         fi
         log ""
