@@ -104,13 +104,12 @@ start_sshd() {
         echo "Public key should be at ${PUBLIC_KEY_SRC}"
         echo "Private key should be at ${PRIVATE_KEY_SRC}"
 
-        if [[ -n "${DEBUG}" ]]; then
-            debug_log "DEBUG mode enabled. Keeping container running with 'tail -f /dev/null'."
-            exec tail -f /dev/null
-        else
-            error "Exiting container due to SSH configuration failure."
-            exit 1
-        fi
+        log "SSH not fully configured. Keeping container running and logging time every 10 minutes."
+        # Log the current time every 10 minutes as the main process
+        while true; do
+            log "Container alive at: $(date)"
+            sleep 600 # Sleep for 10 minutes (600 seconds)
+        done
     fi
 }
 

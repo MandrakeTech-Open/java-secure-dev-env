@@ -34,6 +34,7 @@ To set up the development environment:
 -   **Verification**: After making any code changes, always run relevant tests to ensure functionality.
 -   **Code Quality**: Before finalizing changes, check for any linting or formatting errors.
 -   **Ambiguity**: If instructions are unclear or conflicting, ask for clarification from the user before proceeding.
+-   **Documentation**: Keep this `AGENTS.md` file updated with any new instructions or changes in workflow.
 
 ## Version Control
 
