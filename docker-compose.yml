@@ -89,8 +89,8 @@ services:
         volumes:
             - code_m2:/home/dev/.m2
             - code_vol:/code
-            - ~/.ssh/id_ed25519:/home/dev/host/ssh_key_private:ro
-            - ~/.ssh/id_ed25519.pub:/home/dev/host/ssh_key_public:ro
+            # - ~/.ssh/id_ed25519:/home/dev/host/ssh_key_private:ro
+            # - ~/.ssh/id_ed25519.pub:/home/dev/host/ssh_key_public:ro
         networks:
             - db-net
             - ingress-net
