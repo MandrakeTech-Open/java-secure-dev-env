@@ -67,6 +67,7 @@ services:
         volumes:
             - ./egress/squid.conf:/etc/squid/squid.conf:ro
             - ./egress/domain-lists.d:/etc/squid/domain-lists.d:ro
+            - ./egress/crl-lists.d:/etc/squid/crl-lists.d:ro
             - ./egress/tester.sh:/usr/local/bin/tester.sh:ro
 
     app:
