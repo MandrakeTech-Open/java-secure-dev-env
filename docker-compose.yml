@@ -1,7 +1,5 @@
-volumes:
-    code_m2:
-    code_vol:
-    db_data:
+include:
+    - docker-compose.base.yml
 
 networks:
     db-net:
@@ -14,9 +12,9 @@ networks:
         internal: true
 
 x-pgsql-creds: &db-creds
-    POSTGRES_USER: psqladmin
-    POSTGRES_PASSWORD: secret
-    POSTGRES_DB: admin
+    DB_USER: psqladmin
+    DB_PASSWORD: secret
+    DB_DATABASE: admin
 
 services:
     database:
@@ -69,23 +67,14 @@ services:
             - ./egress/domain-lists.d:/etc/squid/domain-lists.d:ro
             - ./egress/crl-lists.d:/etc/squid/crl-lists.d:ro
             - ./egress/tester.sh:/usr/local/bin/tester.sh:ro
-
     app:
-        image: registry.gitlab.com/mandraketech/secure-dev
+        image: mandraketech.internal/secure-dev
         build:
             context: .
         environment:
-            POSTGRES_HOSTNAME: database
-            http_proxy: http://egress:3128
-            https_proxy: http://egress:3128
-            no_proxy: database,egress
+            DB_HOST: database
+            DB_PORT: 5432
             <<: *db-creds
-        ports:
-            - name: ssh
-              published: 2222
-              target: 22
-        depends_on:
-            - database
         volumes:
             - code_m2:/home/dev/.m2
             - code_vol:/code
@@ -93,5 +82,3 @@ services:
             # - ~/.ssh/id_ed25519.pub:/home/dev/host/ssh_key_public:ro
         networks:
             - db-net
-            - ingress-net
-            - egress-net
