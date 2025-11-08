@@ -4,12 +4,6 @@ include:
 networks:
     db-net:
         internal: true
-    ingress-net:
-        internal: true
-    internet:
-        internal: false
-    egress-net:
-        internal: true
 
 x-pgsql-creds: &db-creds
     DB_USER: psqladmin
@@ -31,42 +25,6 @@ services:
                 limits:
                     cpus: "0.5"
                     memory: 128m
-    ingress:
-        image: registry.gitlab.com/mandraketech/ingress
-        build:
-            context: ./ingress
-        ports:
-            - name: https
-              published: 443
-              target: 443
-            - name: http
-              published: 80
-              target: 80
-        networks:
-            - ingress-net
-        depends_on:
-            - app
-        deploy:
-            resources:
-                limits:
-                    cpus: "0.2"
-                    memory: 32m
-        volumes:
-            - ./ingress/Caddyfile:/etc/caddy/Caddyfile:ro
-            - ./secrets/data:/data
-            - ./secrets/config:/config
-    egress:
-        image: registry.gitlab.com/mandraketech/egress
-        build:
-            context: ./egress
-        networks:
-            - internet
-            - egress-net
-        volumes:
-            - ./egress/squid.conf:/etc/squid/squid.conf:ro
-            - ./egress/domain-lists.d:/etc/squid/domain-lists.d:ro
-            - ./egress/crl-lists.d:/etc/squid/crl-lists.d:ro
-            - ./egress/tester.sh:/usr/local/bin/tester.sh:ro
     app:
         image: mandraketech.internal/secure-dev
         build:
@@ -74,7 +32,7 @@ services:
         environment:
             DB_HOST: database
             DB_PORT: 5432
-            <<: *db-creds
+            <<: [*db-creds, *proxy-env]
         volumes:
             - code_m2:/home/dev/.m2
             - code_vol:/code
@@ -82,3 +40,12 @@ services:
             # - ~/.ssh/id_ed25519.pub:/home/dev/host/ssh_key_public:ro
         networks:
             - db-net
+            - ingress-net
+            - egress-net
+        depends_on:
+            - database
+
+volumes:
+    db_data:
+    code_m2:
+    code_vol:
