@@ -5,7 +5,9 @@ RUN apk add --no-cache \
     ca-certificates \
     squid \
     curl \
-    inotify-tools
+    inotify-tools \
+    wget \
+    && update-ca-certificates
 
 # Create squid user and directories
 RUN mkdir -p /var/cache/squid /var/log/squid && \

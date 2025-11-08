@@ -1,0 +1,45 @@
+networks:
+    db-net:
+        internal: true
+
+x-pgsql-creds: &db-creds
+    POSTGRES_USER: psqladmin
+    POSTGRES_PASSWORD: secret
+    POSTGRES_DB: app_db
+services:
+    database:
+        image: postgres:16-alpine
+        environment:
+            TZ: Asia/Kolkata
+            <<: *db-creds
+        volumes:
+            - db_data:/var/lib/postgresql/data
+        networks:
+            - db-net
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.5"
+                    memory: 128m
+    app:
+        image: mandraketech.internal/app-image
+        build:
+            context: .
+        environment:
+            DB_HOST: database
+            DB_PORT: 5432
+            <<: *db-creds
+        volumes:
+            - code_m2:/home/dev/.m2
+            - code_vol:/code
+            # - ~/.ssh/id_ed25519:/home/dev/host/ssh_key_private:ro
+            # - ~/.ssh/id_ed25519.pub:/home/dev/host/ssh_key_public:ro
+        networks:
+            - db-net
+        depends_on:
+            - database
+
+volumes:
+    db_data:
+    code_m2:
+    code_vol:

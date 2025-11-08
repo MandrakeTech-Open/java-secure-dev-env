@@ -1,40 +1,18 @@
-volumes:
-    code_m2:
-    code_vol:
-    db_data:
-
 networks:
-    db-net:
-        internal: true
     ingress-net:
         internal: true
-    internet:
-        internal: false
     egress-net:
         internal: true
+    internet:
 
-x-pgsql-creds: &db-creds
-    POSTGRES_USER: psqladmin
-    POSTGRES_PASSWORD: secret
-    POSTGRES_DB: admin
+x-proxy-env: &proxy-env 
+    http_proxy: http://egress:3128
+    https_proxy: http://egress:3128
+    no_proxy: egress,database
 
 services:
-    database:
-        image: postgres:16-alpine
-        environment:
-            TZ: Asia/Kolkata
-            <<: *db-creds
-        volumes:
-            - db_data:/var/lib/postgresql/data
-        networks:
-            - db-net
-        deploy:
-            resources:
-                limits:
-                    cpus: "0.5"
-                    memory: 128m
     ingress:
-        image: registry.gitlab.com/mandraketech/ingress
+        image: mandraketech.internal/ingress
         build:
             context: ./ingress
         ports:
@@ -51,47 +29,37 @@ services:
         deploy:
             resources:
                 limits:
-                    cpus: "0.2"
+                    cpus: "0.1"
                     memory: 32m
         volumes:
             - ./ingress/Caddyfile:/etc/caddy/Caddyfile:ro
             - ./secrets/data:/data
             - ./secrets/config:/config
     egress:
-        image: registry.gitlab.com/mandraketech/egress
+        image: mandraketech.internal/egress
         build:
             context: ./egress
         networks:
-            - internet
             - egress-net
+            - internet
         volumes:
             - ./egress/squid.conf:/etc/squid/squid.conf:ro
             - ./egress/domain-lists.d:/etc/squid/domain-lists.d:ro
             - ./egress/crl-lists.d:/etc/squid/crl-lists.d:ro
             - ./egress/tester.sh:/usr/local/bin/tester.sh:ro
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.2"
+                    memory: 128m
 
     app:
-        image: registry.gitlab.com/mandraketech/secure-dev
-        build:
-            context: .
         environment:
-            POSTGRES_HOSTNAME: database
-            http_proxy: http://egress:3128
-            https_proxy: http://egress:3128
-            no_proxy: database,egress
-            <<: *db-creds
+            <<: *proxy-env
         ports:
             - name: ssh
               published: 2222
               target: 22
-        depends_on:
-            - database
-        volumes:
-            - code_m2:/home/dev/.m2
-            - code_vol:/code
-            # - ~/.ssh/id_ed25519:/home/dev/host/ssh_key_private:ro
-            # - ~/.ssh/id_ed25519.pub:/home/dev/host/ssh_key_public:ro
         networks:
-            - db-net
             - ingress-net
             - egress-net
