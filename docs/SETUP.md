@@ -70,7 +70,25 @@ docker compose ps
 - HTTPS: https://www.localhost:443
 - Self-signed certificate (browser will warn, this is expected)
 
-### SSH Access to Dev Container
+### SSH Access to Dev Container (Optional)
+
+SSH access is not enabled by default. To enable SSH access, edit `docker-compose.override.yml` and add a `ports` section to the `app` service:
+
+```yaml
+# docker-compose.override.yml
+services:
+  app:
+    ports:
+      - "2222:22"
+```
+
+Then restart with:
+
+```bash
+docker compose up -d
+```
+
+Connect via:
 
 ```bash
 ssh dev@localhost -p 2222

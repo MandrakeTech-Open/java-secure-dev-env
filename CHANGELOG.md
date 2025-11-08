@@ -27,10 +27,10 @@ docker-compose.override.yml     (Application Config)
    - Deleted problematic base file that caused the conflict
 
 2. **Refactored docker-compose.yml**
-   - Now contains ONLY base infrastructure
-   - Services: ingress (reverse proxy), egress (outbound proxy)
-   - Networks: ingress-net, egress-net, internet
-   - App service has proxy environment variables only
+- Now contains ONLY base infrastructure
+- Services: ingress (reverse proxy), egress (outbound proxy)
+- Networks: ingress-net, egress-net, internet
+- App service stub defines proxy environment variables and networks
 
 3. **Created docker-compose.override.yml**
    - Contains application-specific configuration
@@ -57,7 +57,6 @@ docker-compose.override.yml     (Application Config)
 
 - Override file automatically applied when running `docker compose` commands
 - To use only base infrastructure: `docker compose -f docker-compose.yml`
-- To exclude overrides: `docker compose -f docker-compose.yml` (explicit)
 - Database-only development: `docker compose -f docker-compose.override.yml up database`
 
 ---

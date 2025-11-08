@@ -17,7 +17,7 @@ This document explains how to customize various components of the Java Secure De
 
 ### Changing Published Ports
 
-Ports are defined in `docker-compose.base.yml` under the `ingress` service:
+Ports are defined in `docker-compose.yml` under the `ingress` service:
 
 ```yaml
 ingress:
@@ -48,12 +48,14 @@ Then access via: https://www.localhost:8443
 
 ### SSH Port Mapping
 
-SSH port mapping is commented out in the current setup. To enable:
+SSH port mapping is not enabled by default. To enable SSH access, edit `docker-compose.override.yml` and add a `ports` section to the `app` service:
 
-```bash
-# Check docker-compose.yml for the app service, uncomment or add:
-# ports:
-#   - "2222:22"
+```yaml
+# docker-compose.override.yml
+services:
+  app:
+    ports:
+      - "2222:22"
 ```
 
 Then run:
@@ -61,9 +63,14 @@ Then run:
 docker compose up -d
 ```
 
+You can then connect via:
+```bash
+ssh dev@localhost -p 2222
+```
+
 ## Database Configuration
 
-Database settings are in `docker-compose.yml`:
+Database settings are in `docker-compose.override.yml`:
 
 ```yaml
 x-pgsql-creds: &db-creds
@@ -74,7 +81,7 @@ x-pgsql-creds: &db-creds
 
 ### Changing Database Credentials
 
-Edit `docker-compose.yml` and update the `x-pgsql-creds` block:
+Edit `docker-compose.override.yml` and update the `x-pgsql-creds` block:
 
 ```yaml
 x-pgsql-creds: &db-creds
@@ -92,7 +99,7 @@ docker compose up -d --build
 
 ### Changing Database Memory/CPU Limits
 
-In `docker-compose.yml`, modify the `database` service:
+In `docker-compose.override.yml`, modify the `database` service:
 
 ```yaml
 database:
@@ -105,7 +112,7 @@ database:
 
 ### Using a Different PostgreSQL Version
 
-Change the image in `docker-compose.yml`:
+Change the image in `docker-compose.override.yml`:
 
 ```yaml
 database:
@@ -174,7 +181,7 @@ In `egress/squid.conf`:
 http_port 3128              # Change this
 ```
 
-Then update proxy references in `docker-compose.base.yml`:
+Then update proxy references in `docker-compose.yml`:
 
 ```yaml
 x-proxy-env: &proxy-env 
@@ -294,7 +301,7 @@ www.localhost {
 }
 ```
 
-Then mount the certificate files in `docker-compose.base.yml`:
+Then mount the certificate files in `docker-compose.yml`:
 
 ```yaml
 ingress:
@@ -306,7 +313,7 @@ ingress:
 
 ### App Container Environment Variables
 
-Edit `docker-compose.yml` app service to add custom variables:
+Edit `docker-compose.override.yml` app service to add custom variables:
 
 ```yaml
 app:
@@ -320,7 +327,7 @@ app:
 
 ### Proxy Environment Variables
 
-In `docker-compose.base.yml`:
+In `docker-compose.yml`:
 
 ```yaml
 x-proxy-env: &proxy-env 
@@ -340,7 +347,7 @@ Modifications to ingress/egress should go in `docker-compose.yml`.
 
 ### Changing Container Image Names
 
-In `docker-compose.override.yml`:
+For the app and database services, modify `docker-compose.override.yml`:
 
 ```yaml
 app:
@@ -359,7 +366,7 @@ egress:
 
 ### Adding New Services
 
-Add to `docker-compose.yml`:
+For application-level services like caches or queues, add to `docker-compose.override.yml`:
 
 ```yaml
 redis:
@@ -373,7 +380,7 @@ redis:
                 memory: 64m
 ```
 
-And create the network:
+And create the network in `docker-compose.override.yml`:
 
 ```yaml
 networks:
@@ -383,7 +390,7 @@ networks:
 
 ### Changing Volume Mounts
 
-In `docker-compose.yml`:
+In `docker-compose.override.yml`:
 
 ```yaml
 app:
@@ -396,7 +403,7 @@ app:
 
 ### CPU and Memory Limits
 
-Edit limits in `docker-compose.base.yml` or `docker-compose.yml`:
+Edit limits in `docker-compose.yml` or `docker-compose.override.yml`, depending on the service:
 
 ```yaml
 ingress:
@@ -418,7 +425,7 @@ Common settings:
 
 ### Changing Volume Sizes
 
-For PostgreSQL cache directory in `docker-compose.yml`, increase volume:
+For PostgreSQL data directory in `docker-compose.override.yml`, if you need to resize the volume:
 
 ```bash
 # Stop services
@@ -491,7 +498,7 @@ auth_param basic program /usr/lib/squid/basic_auth_helper /etc/squid/auth.txt
 
 ### Scenario 2: Development with Multiple Apps
 
-In `docker-compose.yml`, add additional services:
+In `docker-compose.override.yml`, add additional services:
 
 ```yaml
 app2:
@@ -537,7 +544,7 @@ www.example.com {
 }
 ```
 
-In `docker-compose.base.yml`:
+In `docker-compose.yml`:
 
 ```yaml
 ingress:
