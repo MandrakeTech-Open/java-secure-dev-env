@@ -49,4 +49,8 @@ services:
             - ./egress/tester.sh:/usr/local/bin/tester.sh:ro
 
     app:
-        image: mandraketech.internal/secure-dev
+        environment:
+            <<: *proxy-env
+        networks:
+            - ingress-net
+            - egress-net
