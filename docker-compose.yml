@@ -1,49 +1,56 @@
-include:
-    - docker-compose.base.yml
-
 networks:
-    db-net:
+    ingress-net:
         internal: true
+    egress-net:
+        internal: true
+    internet:
 
-x-pgsql-creds: &db-creds
-    DB_USER: psqladmin
-    DB_PASSWORD: secret
-    DB_DATABASE: admin
+x-proxy-env: &proxy-env 
+    http_proxy: http://egress:3128
+    https_proxy: http://egress:3128
+    no_proxy: egress
 
 services:
-    database:
-        image: postgres:16-alpine
-        environment:
-            TZ: Asia/Kolkata
-            <<: *db-creds
-        volumes:
-            - db_data:/var/lib/postgresql/data
+    ingress:
+        image: mandraketech.internal/ingress
+        build:
+            context: ./ingress
+        ports:
+            - name: https
+              published: 443
+              target: 443
+            - name: http
+              published: 80
+              target: 80
         networks:
-            - db-net
+            - ingress-net
+        depends_on:
+            - app
         deploy:
             resources:
                 limits:
-                    cpus: "0.5"
-                    memory: 128m
-    app:
-        image: mandraketech.internal/secure-dev
-        build:
-            context: .
-        environment:
-            DB_HOST: database
-            DB_PORT: 5432
-            <<: *db-creds
+                    cpus: "0.1"
+                    memory: 32m
         volumes:
-            - code_m2:/home/dev/.m2
-            - code_vol:/code
-            # - ~/.ssh/id_ed25519:/home/dev/host/ssh_key_private:ro
-            # - ~/.ssh/id_ed25519.pub:/home/dev/host/ssh_key_public:ro
+            - ./ingress/Caddyfile:/etc/caddy/Caddyfile:ro
+            - ./secrets/data:/data
+            - ./secrets/config:/config
+    egress:
+        image: mandraketech.internal/egress
+        build:
+            context: ./egress
         networks:
-            - db-net
-        depends_on:
-            - database
+            - egress-net
+            - internet
+        volumes:
+            - ./egress/squid.conf:/etc/squid/squid.conf:ro
+            - ./egress/domain-lists.d:/etc/squid/domain-lists.d:ro
+            - ./egress/crl-lists.d:/etc/squid/crl-lists.d:ro
+            - ./egress/tester.sh:/usr/local/bin/tester.sh:ro
 
-volumes:
-    db_data:
-    code_m2:
-    code_vol:
+    app:
+        environment:
+            <<: *proxy-env
+        networks:
+            - ingress-net
+            - egress-net

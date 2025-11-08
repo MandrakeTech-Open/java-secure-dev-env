@@ -4,15 +4,38 @@ This document provides guidance for AI coding agents working on this project, in
 
 ## Project Context
 
-This project is a Java secure development environment, primarily focusing on Dockerized services for egress filtering.
+This project is a Java secure development environment, primarily focusing on Dockerized services for egress filtering, ingress reverse proxying, and secure application hosting. It provides a complete Docker-based development infrastructure with network segmentation, egress proxy filtering via Squid, and HTTPS ingress via Caddy.
+
 The instructions in this project will ALWAYS be overridden by the downstream project.
+
+## Architecture Overview
+
+The project consists of multiple Docker services organized with network segmentation:
+
+- **app**: Main Java application container (BellSoft Liberica OpenJDK with Debian)
+- **database**: PostgreSQL 16-alpine for data persistence
+- **ingress**: Caddy 2-alpine reverse proxy providing HTTPS termination
+- **egress**: Alpine with Squid for outbound HTTP/HTTPS proxy filtering
+
+Three internal networks enforce isolation:
+- **db-net**: App ↔ Database (internal)
+- **ingress-net**: App ↔ Ingress (internal)
+- **egress-net**: App ↔ Egress (internal)
+- **internet**: Egress ↔ External internet (outbound only)
 
 ## Setup Instructions
 
-To set up the development environment:
+For detailed setup instructions, see [docs/SETUP.md](docs/SETUP.md).
+
+Quick start:
 1.  Ensure Docker and Docker Compose are installed.
 2.  Clone the repository.
-3.  Build and run the services using `docker compose up --build --detach`. Read up docker compose instructions for all other combinations.
+3.  Run `./setup.sh` or manually execute:
+    ```bash
+    mkdir -p secrets
+    docker compose build --no-cache
+    docker compose up -d
+    ```
 
 ## Code Style and Conventions
 
@@ -28,6 +51,17 @@ To set up the development environment:
     1.  Start only the egress service: `docker compose up -d egress`
     2.  Execute the tester script inside the egress container: `docker compose exec egress /usr/local/bin/tester.sh`
     3.  Stop the egress service: `docker compose down egress`
+
+## Docker Compose Files
+
+The project uses Docker Compose's override pattern for clean separation:
+
+- **docker-compose.yml**: Base infrastructure (ingress, egress, proxy networks)
+- **docker-compose.override.yml**: Application config (app, database, app networks)
+
+Docker Compose automatically merges both files when you run `docker compose` commands. This pattern resolves the service conflict issue and provides flexibility for environment-specific configurations.
+
+See [CHANGELOG.md](CHANGELOG.md) for architectural details.
 
 ## Agent Workflow Guidelines
 
