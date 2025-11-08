@@ -3,18 +3,16 @@ networks:
         internal: true
 
 x-pgsql-creds: &db-creds
-    DB_USER: ${DB_USER:-psqladmin}
-    DB_PASSWORD: ${DB_PASSWORD:-secret}
-    DB_DATABASE: ${DB_DATABASE:-admin}
+    POSTGRES_USER: psqladmin
+    POSTGRES_PASSWORD: secret
+    POSTGRES_DB: admin
 
 services:
     database:
         image: postgres:16-alpine
         environment:
             TZ: ${TZ:-UTC}
-            POSTGRES_USER: ${DB_USER:-psqladmin}
-            POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
-            POSTGRES_DB: ${DB_DATABASE:-admin}
+            <<: *db-creds
         volumes:
             - db_data:/var/lib/postgresql/data
         networks:
