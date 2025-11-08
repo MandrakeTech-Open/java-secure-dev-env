@@ -47,10 +47,19 @@ services:
             - ./egress/domain-lists.d:/etc/squid/domain-lists.d:ro
             - ./egress/crl-lists.d:/etc/squid/crl-lists.d:ro
             - ./egress/tester.sh:/usr/local/bin/tester.sh:ro
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.2"
+                    memory: 128m
 
     app:
         environment:
             <<: *proxy-env
+        ports:
+            - name: ssh
+              published: 2222
+              target: 22
         networks:
             - ingress-net
             - egress-net

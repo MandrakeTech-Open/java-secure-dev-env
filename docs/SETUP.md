@@ -103,13 +103,13 @@ Password authentication is disabled. Uses public key authentication only.
 PostgreSQL is running on an internal network and is not directly accessible from the host. Access it through the app container:
 
 ```bash
-docker compose exec app psql -h database -U psqladmin -d admin
+docker compose exec app psql -h database -U psqladmin -d app_db
 ```
 
 Default credentials:
 - User: `psqladmin`
 - Password: `secret`
-- Database: `admin`
+- Database: `app_db`
 
 ## Docker Compose Configuration
 
@@ -192,12 +192,12 @@ The app container receives the following environment variables:
 ```
 DB_HOST=database
 DB_PORT=5432
-DB_USER=psqladmin
-DB_PASSWORD=secret
-DB_DATABASE=admin
+POSTGRES_USER=psqladmin
+POSTGRES_PASSWORD=secret
+POSTGRES_DB=app_db
 http_proxy=http://egress:3128
 https_proxy=http://egress:3128
-no_proxy=egress
+no_proxy=egress,database
 ```
 
 ## Common Commands

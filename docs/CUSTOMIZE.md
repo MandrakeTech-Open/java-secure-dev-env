@@ -74,9 +74,9 @@ Database settings are in `docker-compose.override.yml`:
 
 ```yaml
 x-pgsql-creds: &db-creds
-    DB_USER: psqladmin              # Change username
-    DB_PASSWORD: secret             # Change password
-    DB_DATABASE: admin              # Change database name
+    POSTGRES_USER: psqladmin        # Change username
+    POSTGRES_PASSWORD: secret       # Change password
+    POSTGRES_DB: app_db             # Change database name
 ```
 
 ### Changing Database Credentials
@@ -85,9 +85,9 @@ Edit `docker-compose.override.yml` and update the `x-pgsql-creds` block:
 
 ```yaml
 x-pgsql-creds: &db-creds
-    DB_USER: myuser
-    DB_PASSWORD: mysecurepassword
-    DB_DATABASE: myappdb
+    POSTGRES_USER: myuser
+    POSTGRES_PASSWORD: mysecurepassword
+    POSTGRES_DB: myappdb
 ```
 
 Then rebuild and restart:
@@ -478,7 +478,7 @@ curl -k https://www.localhost
 ### Test Database Changes
 
 ```bash
-docker compose exec app psql -h database -U newusername -d newdbname
+docker compose exec app psql -h database -U psqladmin -d app_db
 ```
 
 ## Common Customization Scenarios
