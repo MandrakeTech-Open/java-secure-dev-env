@@ -1,5 +1,5 @@
 ARG JDK_VERSION=25
-FROM bellsoft/liberica-openjdk-alpine:${JDK_VERSION}
+FROM bellsoft/liberica-openjdk-alpine-musl:${JDK_VERSION}
 
 # Install required packages using Debian package manager
 RUN apk update && \
