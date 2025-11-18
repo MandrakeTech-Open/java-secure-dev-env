@@ -1,46 +1,19 @@
-FROM bellsoft/liberica-openjdk-debian:latest-cds
-
-ENV DEBIAN_FRONTEND=noninteractive
+ARG JDK_VERSION=25
+FROM bellsoft/liberica-openjdk-alpine-musl:${JDK_VERSION}
 
 # Install required packages using Debian package manager
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apk update && \
+    apk add --no-cache \
     bash \
     git \
     curl \
     unzip \
-    openssh-server \
-    openssh-client \
-    ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
-
-# Ensure sshd runtime directories exist
-RUN mkdir -p /run/sshd /var/run/sshd
-
-# Create user and set a simple password for development use
-RUN adduser --disabled-password --comment "dev user" --shell /bin/bash dev && \
-    echo "dev:dev" | chpasswd
-
-# Create code and ssh directories and set proper ownership/permissions
-RUN mkdir -p /code /home/dev/.ssh && \
-    chown -R dev:dev /code /home/dev/.ssh && \
-    chmod 700 /home/dev/.ssh
-
-# Configure SSH daemon (additional configuration file)
-RUN mkdir -p /etc/ssh/sshd_config.d
-
-COPY sshd-config/* /etc/ssh/sshd_config.d
-
-# Generate host keys if necessary
-RUN ssh-keygen -A
-
-EXPOSE 22
+    libstdc++ \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+# Create code directory and set proper ownership/permissions
+	&& mkdir /code
 
 VOLUME ["/code"]
 
-# Entrypoint script: generates host key if missing, copies user keys if provided, and starts sshd
-COPY entrypoint.sh /entrypoint.sh
-
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT [ "/entrypoint.sh" ]
+CMD ["sleep", "infinity"]
