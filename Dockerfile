@@ -1,24 +1,16 @@
-FROM bellsoft/liberica-openjdk-debian:latest-cds
-
-ENV DEBIAN_FRONTEND=noninteractive
+ARG JDK_VERSION=25
+FROM bellsoft/liberica-openjdk-alpine:${JDK_VERSION}
 
 # Install required packages using Debian package manager
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apk update && \
+    apk add --no-cache \
     bash \
     git \
     curl \
     unzip \
-    ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
-
-# Create user and set a simple password for development use
-RUN adduser --disabled-password --comment "dev user" --shell /bin/bash dev
-
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
 # Create code directory and set proper ownership/permissions
-RUN mkdir -p /code && \
-    chown -R dev:dev /code
+	mkdir /code
 
 VOLUME ["/code"]
-
-CMD ["sleep", "infinity"]
