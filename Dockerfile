@@ -14,3 +14,5 @@ RUN apk update && \
 	mkdir /code
 
 VOLUME ["/code"]
+
+CMD ["sleep", "infinity"]
