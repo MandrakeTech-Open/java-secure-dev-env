@@ -5,7 +5,6 @@ This document provides step-by-step instructions for setting up the Java Secure 
 ## Prerequisites
 
 - Docker and Docker Compose (version 2.0+)
-- SSH key pair (Ed25519 recommended)
 - Git
 
 ## Quick Start
@@ -17,15 +16,7 @@ git clone https://github.com/MandrakeTech-Open/java-secure-dev-env.git
 cd java-secure-dev-env
 ```
 
-### 2. Generate SSH Keys (if needed)
-
-If you don't have an SSH key pair, generate one:
-
-```bash
-ssh-keygen -t ed25519 -C "your-email@example.com" -f ~/.ssh/id_ed25519
-```
-
-### 3. Run Setup Script
+### 2. Run Setup Script
 
 ```bash
 ./setup.sh
@@ -33,11 +24,10 @@ ssh-keygen -t ed25519 -C "your-email@example.com" -f ~/.ssh/id_ed25519
 
 This script will:
 - Create necessary directories (`secrets/` folder)
-- Validate SSH key presence
 - Build and start all Docker services
 - Display service endpoints
 
-### 4. Verify Services Are Running
+### 3. Verify Services Are Running
 
 ```bash
 docker compose ps
@@ -69,34 +59,6 @@ docker compose ps
 
 - HTTPS: https://www.localhost:443
 - Self-signed certificate (browser will warn, this is expected)
-
-### SSH Access to Dev Container (Optional)
-
-SSH access is not enabled by default. To enable SSH access, edit `docker-compose.override.yml` and add a `ports` section to the `app` service:
-
-```yaml
-# docker-compose.override.yml
-services:
-  app:
-    ports:
-      - "2222:22"
-```
-
-Then restart with:
-
-```bash
-docker compose up -d
-```
-
-Connect via:
-
-```bash
-ssh dev@localhost -p 2222
-```
-
-Default user: `dev`
-
-Password authentication is disabled. Uses public key authentication only.
 
 ### Database Access
 
@@ -154,7 +116,7 @@ The environment uses four Docker networks:
 
 - Image: `mandraketech.internal/secure-dev`
 - Based on: BellSoft Liberica OpenJDK with Debian
-- Includes: SSH server, Git, Maven support
+- Includes: Git, Maven support
 - Mounts: `/code` volume, Maven cache
 
 ### Database Container
@@ -247,18 +209,6 @@ docker compose exec egress /usr/local/bin/tester.sh
 
 ## Troubleshooting
 
-### SSH Connection Refused
-
-**Issue**: Cannot connect via SSH
-```
-ssh: connect to host localhost port 2222: Connection refused
-```
-
-**Solution**:
-- Ensure the app container is running: `docker compose ps`
-- Check logs: `docker compose logs app`
-- Verify SSH keys are mounted correctly
-
 ### Database Connection Errors
 
 **Issue**: Cannot connect to database
@@ -299,9 +249,8 @@ lsof -i :443
 
 Once the environment is set up:
 
-1. SSH into the app container
-2. Review the `/code` volume (shared with host)
-3. Check database access from the container
-4. Review the proxy/ingress configurations in respective config files
+1. Review the `/code` volume (shared with host)
+2. Check database access from the container
+3. Review the proxy/ingress configurations in respective config files
 
 For more details on customization, see [CUSTOMIZE.md](CUSTOMIZE.md).

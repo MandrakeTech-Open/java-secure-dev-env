@@ -6,12 +6,11 @@ This document explains how to customize various components of the Java Secure De
 
 1. [Modifying Service Ports](#modifying-service-ports)
 2. [Database Configuration](#database-configuration)
-3. [SSH Configuration](#ssh-configuration)
-4. [Egress Proxy (Squid) Configuration](#egress-proxy-squid-configuration)
-5. [Ingress Reverse Proxy (Caddy) Configuration](#ingress-reverse-proxy-caddy-configuration)
-6. [Environment Variables](#environment-variables)
-7. [Docker Compose Configuration](#docker-compose-configuration)
-8. [Resource Limits](#resource-limits)
+3. [Egress Proxy (Squid) Configuration](#egress-proxy-squid-configuration)
+4. [Ingress Reverse Proxy (Caddy) Configuration](#ingress-reverse-proxy-caddy-configuration)
+5. [Environment Variables](#environment-variables)
+6. [Docker Compose Configuration](#docker-compose-configuration)
+7. [Resource Limits](#resource-limits)
 
 ## Modifying Service Ports
 
@@ -45,28 +44,6 @@ ports:
 Then access via: https://www.localhost:8443
 
 > **Note**: Only the `published` port needs to change. The `target` port (internal to container) stays the same.
-
-### SSH Port Mapping
-
-SSH port mapping is not enabled by default. To enable SSH access, edit `docker-compose.override.yml` and add a `ports` section to the `app` service:
-
-```yaml
-# docker-compose.override.yml
-services:
-  app:
-    ports:
-      - "2222:22"
-```
-
-Then run:
-```bash
-docker compose up -d
-```
-
-You can then connect via:
-```bash
-ssh dev@localhost -p 2222
-```
 
 ## Database Configuration
 
@@ -117,56 +94,6 @@ Change the image in `docker-compose.override.yml`:
 ```yaml
 database:
     image: postgres:15-alpine  # Change from 16-alpine
-```
-
-## SSH Configuration
-
-SSH daemon configuration is in `sshd-config/user-dev-enable.conf`:
-
-```conf
-PermitRootLogin no              # Allow root login (not recommended)
-PasswordAuthentication no        # Allow password auth
-PubkeyAuthentication yes         # Disable public key auth
-ListenAddress 0.0.0.0           # Change listen address
-ListenAddress ::
-AllowUsers dev                   # Add more users
-```
-
-### Allowing Additional Users
-
-To add more users with SSH access, edit `sshd-config/user-dev-enable.conf`:
-
-```conf
-AllowUsers dev user2 user3
-```
-
-Then modify the `Dockerfile` to create additional users:
-
-```dockerfile
-RUN adduser --disabled-password --comment "user2" --shell /bin/bash user2 && \
-    adduser --disabled-password --comment "user3" --shell /bin/bash user3
-```
-
-### Enabling Password Authentication
-
-In `sshd-config/user-dev-enable.conf`, change:
-
-```conf
-PasswordAuthentication yes       # Instead of no
-```
-
-> **Security Note**: Password auth is disabled by default for security. Re-enabling reduces security.
-
-### Changing SSH Port
-
-The SSH daemon listens on port 22 inside the container. To expose it:
-
-Edit `docker-compose.yml` and add to the `app` service:
-
-```yaml
-app:
-    ports:
-        - "2222:22"              # Host:Container
 ```
 
 ## Egress Proxy (Squid) Configuration
