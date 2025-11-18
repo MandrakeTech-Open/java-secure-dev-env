@@ -8,7 +8,6 @@ networks:
 x-proxy-env: &proxy-env 
     http_proxy: http://egress:3128
     https_proxy: http://egress:3128
-    no_proxy: egress,database
 
 services:
     ingress:
