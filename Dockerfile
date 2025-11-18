@@ -8,6 +8,7 @@ RUN apk update && \
     git \
     curl \
     unzip \
+    libstdc++ \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
 # Create code directory and set proper ownership/permissions

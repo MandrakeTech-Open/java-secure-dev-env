@@ -1,0 +1,17 @@
+{
+	"name": "Java Dev",
+	"dockerComposeFile": [
+		"docker-compose.yml",
+		"docker-compose.override.yml"
+	],
+	"workspaceFolder": "/code",
+	"service": "app",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"vscjava.vscode-java-pack",
+				"vmware.vscode-boot-dev-pack"
+			]
+		}
+	}
+}
